@@ -15,6 +15,7 @@ init:
 	
 revoke:
 	vagrant snapshot restore 'ready_provision'
+
 gui:
 	vagrant up --no-provision
 	virt-viewer -a -c qemu:///session vagrant-kafl-windows
@@ -29,7 +30,13 @@ target: compile ansible
 	TARGET_HARNESS='provision_target' vagrant provision
 	vagrant halt
 
-
 no_target: compile ansible
 	vagrant up --no-provision --debug
 	vagrant provision
+
+setup:
+    source ../../env.sh
+    pip install angr virtualenvwrapper boltons argparse ipdb r2pipe angr-utils
+    cd angrPT/angr-dev
+    pip install -e ./bingraphvis
+    pip install -e ./angr-utils
