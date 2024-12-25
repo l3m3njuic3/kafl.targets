@@ -22,7 +22,7 @@ gui:
 
 compile:
 	mkdir -p bin/{userspace,driver}
-	x86_64-w64-mingw32-gcc src/userspace/selffuzz_test.c -I ../ -o bin/userspace/selffuzz_test.exe -Wall -mwindows 
+	x86_64-w64-mingw32-gcc src/userspace/selffuzz_test.c -I ../ -o bin/userspace/selffuzz_test.exe -Wall -mwindows
 	x86_64-w64-mingw32-gcc src/driver/vuln_test.c -I ../ -o bin/driver/vuln_test.exe -Wall -lntdll -lpsapi
 
 target: compile ansible
@@ -34,9 +34,25 @@ no_target: compile ansible
 	vagrant up --no-provision --debug
 	vagrant provision
 
-setup:
-    source ../../env.sh
-    pip install angr virtualenvwrapper boltons argparse ipdb r2pipe angr-utils
-    cd angrPT/angr-dev
-    pip install -e ./bingraphvis
-    pip install -e ./angr-utils
+setup_init: setup_angr
+	mkdir -p ./seed
+	mkdir -p bin/driver
+	cp ../../fuzzer/Utils/Harness_for_nyx.sys ./bin/driver
+
+setup_angr:
+	@echo "Entering environment in sub-shell"
+	source ../../env.sh && \
+	pip install angr virtualenvwrapper boltons argparse ipdb r2pipe angr-utils && \
+	pip install -e angrPT/angr-dev/bingraphvis && \
+	pip install -e angrPT/angr-dev/angr-utils
+
+# get IoControlCode aka result.json using angrPT
+control_code:
+	@echo "Entering environment in sub-shell"
+	source ../../env.sh && \
+	ls bin/driver && \
+	echo "Driver Name: " && \
+	read driver_name && \
+	python3 angrPT/angrpt.py -d bin/driver/$$driver_name && \
+	cp result/$${driver_name%.*}/$${driver_name%.*}.json result.json && \
+	echo "result.json produced successfully"
