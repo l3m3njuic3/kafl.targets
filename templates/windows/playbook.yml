@@ -115,4 +115,25 @@
     - name: Enable Testsigning
       win_command: Bcdedit.exe -set TESTSIGNING ON
 
-    
+    - name: Enable RDP
+      win_regedit:
+        path: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server
+        name: fDenyTSConnections
+        data: 0
+        type: dword
+        state: present
+
+    - name: Allow RDP through the firewall
+      win_firewall_rule:
+        name: Remote Desktop
+        group: Remote Desktop
+        action: allow
+        enabled: yes
+
+    - name: Allow ICMPv4-In through the firewall
+      win_firewall_rule:
+        name: Allow ICMPv4-In
+        protocol: ICMPv4
+        action: allow
+        direction: in
+        enabled: yes
