@@ -34,6 +34,16 @@ no_target: compile ansible
 	vagrant up --no-provision --debug
 	vagrant provision
 
+start_fuzz:
+	@echo "Entering environment in sub-shell"
+	source ../../env.sh && \
+	kafl fuzz -w work --seed-dir seed --redqueen -p `nproc` --t-soft 255 --purge -i result.json --use_call_stack --t-hard 255
+
+start_fuzzgui:
+	@echo "Entering environment in sub-shell"
+	source ../../env.sh && \
+	kafl gui -w work
+
 setup_init: setup_angr
 	mkdir -p ./seed
 	mkdir -p bin/driver
@@ -50,9 +60,8 @@ setup_angr:
 control_code:
 	@echo "Entering environment in sub-shell"
 	source ../../env.sh && \
-	ls bin/driver && \
-	echo "Driver Name: " && \
-	read driver_name && \
-	python3 angrPT/angrpt.py -d bin/driver/$$driver_name && \
-	cp result/$${driver_name%.*}/$${driver_name%.*}.json result.json && \
+	driver=$$(ls bin/driver | grep -v -e "Harness_for_nyx.sys" -e "vuln_test.exe") && \
+	echo "Selected driver: $$driver" && \
+	python3 angrPT/angrpt.py -d bin/driver/$$driver && \
+	cp result/$${driver%.*}/$${driver%.*}.json result.json && \
 	echo "result.json produced successfully"

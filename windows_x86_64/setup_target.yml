@@ -33,7 +33,7 @@
         start_mode: auto
 
     - name: Set service to Vuln Target
-      win_command: "sc create target binPath= {{ dest_path + '/bin/driver/target.sys' | ansible.windows.quote }} type= kernel start= auto"
+      win_command: "sc create target binPath= {{ dest_path + '/bin/driver/amdfendr.sys' | ansible.windows.quote }} type= kernel start= auto"
       register: result_target
       failed_when:
         - result_target.rc != 0
